@@ -38,6 +38,8 @@ def initSettings():
         "screen_param": 1300,
 
         "panel_param": 132,
+
+        "char_param": 7.5,
     }
     ps.loadWithDefault(defaultOptions, onChanged=updateAssets)
 
@@ -263,7 +265,7 @@ class StormPaletteCommand(sublime_plugin.WindowCommand):
     @staticmethod
     def getLineNumerExt(view):
         lineCount = view.rowcol(view.size())[0] + 1
-        return len(str(lineCount)) * 8.5
+        return len(str(lineCount)) * 7.5
 
     @staticmethod
     def alignAssetKey(view, assets):
