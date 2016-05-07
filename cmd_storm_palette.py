@@ -4,7 +4,7 @@ import fn
 import sublime_plugin
 import sublime
 from SublimeUtils import Setting, Panel, WView, Project
-from MUtils import Str, Data, Input, Exp
+from MUtils import Os, Str, Data, Input, Exp
 from MUtils.FileDataSrc import JsonSrcManager, Asset
 from SublimeUtils.Context import Context
 
@@ -136,8 +136,8 @@ class PalKeySrcManager(JsonSrcManager):
         workDir, prjFileName = os.path.split(project)
         prjName, _ = os.path.splitext(prjFileName)
         assetPath = os.path.join(workDir, PROJECT_SRC_BASENAME, prjName)
-        if makeIfNotExist and os.path.exists(assetPath):
-            os.mkdir(assetPath)
+        if makeIfNotExist and not os.path.exists(assetPath):
+            Os.promiseDirectory(assetPath)
 
         return assetPath
 
@@ -154,11 +154,11 @@ class PalKeySrcManager(JsonSrcManager):
         return key.lower().startswith(HIDDEN_ASSET_TOKEN)
 
 Pm = PalKeySrcManager(SRC_FILE_EXT)
+PrjInfo = Project.ProjectInfoManager()
 
 class StormPaletteCommand(sublime_plugin.WindowCommand):
     def __init__(self, *args, **kwds):
         super().__init__(*args, **kwds)
-        self.prjInfo = Project.ProjectInfoManager()
         self.dummyIndex = -1
         self.indexOfAssetMap = {}
         self.virutalAssets = None
@@ -182,7 +182,8 @@ class StormPaletteCommand(sublime_plugin.WindowCommand):
         selectedIndex = 1
         assets = self.filterAssets(view, self.assets())
 
-        lastPalKey = self.prjInfo.tVal("last_palkey")
+        lastPalKey = PrjInfo.tVal("last_palkey")
+
         if lastPalKey is not None:
             for idx, asset in enumerate(assets):
                 if asset.key == lastPalKey:
@@ -297,7 +298,7 @@ class StormPaletteCommand(sublime_plugin.WindowCommand):
 
     def invokeAsset(self, asset, regAsLastKey=False):
         if regAsLastKey:
-            self.prjInfo.regItem("last_palkey", asset.key)
+            PrjInfo.regItem("last_palkey", asset.key)
 
         command = asset.val["command"]
         args = asset.val.get("args", {})
@@ -326,7 +327,7 @@ class StormPaletteCommand(sublime_plugin.WindowCommand):
 
         curIndex = 0
 
-        lastIterKey = self.prjInfo.val("last_iterkey")
+        lastIterKey = PrjInfo.val("last_iterkey")
         if lastIterKey is not None:
             for idx, asset in enumerate(assets):
                 if asset.key == lastIterKey:
@@ -335,7 +336,7 @@ class StormPaletteCommand(sublime_plugin.WindowCommand):
         curIndex = curIndex % len(asset)
         asset = assets[curIndex]
         self.invokeAsset(asset)
-        self.prjInfo.regItem("last_iterkey", asset.key, False)
+        PrjInfo.regItem("last_iterkey", asset.key, False)
 
 class StormPaletteRecordCommand(sublime_plugin.WindowCommand):
     def __init__(self, *args, **kwds):
