@@ -16,7 +16,6 @@ def plugin_unloaded():
 
 def initSettings():
     defaultOptions = {
-        "debug": False,
         "lexical_kwds_modes": [
             #sync and is default
             {"pattern": "(?i)^\\s*@s\\s*(.*)",
@@ -93,14 +92,11 @@ class RunShellCmdCommand(sublime_plugin.WindowCommand):
     def __init__(self, *args):
         super().__init__(*args)
         self.asncCmdCount = 0
-        self.debug = False
 
     @Input.fwAskQuestions(
         fn.F(Panel.showInputPanel, None),
         fn.F(sublime.message_dialog, "Canceled on answering question!"))
     def run(self, qAndaDict=None, **kwds):
-        self.debug = ps.opts["debug"]
-
         _async = kwds.pop("async", True)
         commands = kwds.pop("commands")
         run_mode = kwds.pop("run_mode", "capture_both")
@@ -122,9 +118,6 @@ class RunShellCmdCommand(sublime_plugin.WindowCommand):
                           run_opts=run_opts,
                           dyn_report_mul=dyn_report_mul
                          )
-        if self.debug:
-            print("RunShellCmd workParams: ", workParams)
-
         if _async:
             view = self.window.active_view()
             self.asncCmdCount += 1
