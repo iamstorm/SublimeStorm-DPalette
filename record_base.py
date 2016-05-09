@@ -41,7 +41,8 @@ class RecordContentBaseCommand(sublime_plugin.WindowCommand):
         elif record_mode == "record":
             pass
         else:
-            sublime.error_message("record_mode: {} is not allowed".format(record_mode))
+            sublime.error_message(
+                "record_mode: {} is not allowed".format(record_mode))
 
         content = Data.transfJsonObj(content, self.needTransf, self.transf)
         self.vRecordContent(key, content, belong_to_project)
@@ -89,13 +90,16 @@ class RecordJsonAssetBaseCommand(RecordContentBaseCommand):
 
     def vRecordContent(self, key, content, belong_to_project):
         recordFilePath = self.vGetRecordFilePath(belong_to_project)
+        contentDict = {self.vMetaSectionKey: []}
         if os.path.exists(recordFilePath):
-            with open(recordFilePath, "r") as f:
-                contentDict = json.load(f)
+            try:
+                with open(recordFilePath, "r") as f:
+                    contentDict = json.load(f)
+            except Exception as e:
+                sublime.error_message(
+                    "parse file:\n{0}\nerror:\n{1}".format(recordFilePath, str(e)))
 
             self.filterOutContent(contentDict, key)
-        else:
-            contentDict = {self.vMetaSectionKey: []}
 
         contentDict[self.vMetaSectionKey].append(content)
         self.vSaveRecordFile(recordFilePath, contentDict, belong_to_project)
