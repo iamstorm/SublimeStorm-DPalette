@@ -20,6 +20,10 @@ class PanelAssetBaseCommand(sublime_plugin.WindowCommand):
     @Panel.fwShowQuickPanel()
     @Exp.fwReportException(sublime.error_message)
     def run(self, **kwds):
+        self.vBeginRun(**kwds)
+        return self.vEndRun(self._run(**kwds))
+
+    def _run(self, **kwds):
         run_mode = kwds.get("run_mode", "panel")
 
         if run_mode == "key":
@@ -33,34 +37,53 @@ class PanelAssetBaseCommand(sublime_plugin.WindowCommand):
             iterInfo.iterHead = kwds.get("iter_head", iterInfo.iterHead)
             self.iterKey(iterInfo)
             return
+        elif run_mode == "repeat_lastkey":
+            lastKey = self.vPrjInfo().tVal("last_key")
+            if lastKey is None:
+                sublime.error_message("no invoke yet, can't repeate last key!")
+                return
+
+            self.invokeKey(lastKey)
+            return
         elif run_mode != "panel":
             raise ValueError("run_mode: {} is not allowed", run_mode)
 
         view = self.window.active_view()
         selectedIndex = 1
-        assets = self.filterAssets(view, self.vAssets())
+        assets = self.filterAssets(view, self.allAssets())
 
         lastKey = self.vPrjInfo().tVal("last_key")
-
         if lastKey is not None:
             for idx, asset in enumerate(assets):
                 if asset.key == lastKey:
                     selectedIndex = idx
 
         quickInvokeInfoArr = self.alignAssetKey(view, assets)
-        self.dummyIndex = -1
         self.dummyIndex = len(quickInvokeInfoArr)
         if self.needLongPanel:
             quickInvokeInfoArr.append(" "*500)
 
         return self, quickInvokeInfoArr, selectedIndex, self.vPanelFlags()
 
+    def vBeginRun(self, **kwds):
+        pass
+
+    @staticmethod
+    def vEndRun(panelData):
+        return panelData
+
     @staticmethod
     def vPanelFlags():
         return sublime.MONOSPACE_FONT
 
-    def vAssets(self):
-        raise NotImplementedError()
+    def allAssets(self):
+        assets = self.vConcreteAssets()[::]
+        self.virutalAssets = self.makeVirtualAssets()
+        assets.extend(self.virutalAssets)
+        for asset in assets:
+            asset.key = asset.key.lower()
+
+        return assets
 
     def vConcreteAssets(self):
         raise NotImplementedError()
@@ -119,9 +142,9 @@ class PanelAssetBaseCommand(sublime_plugin.WindowCommand):
 
         return assetKeys
 
-    def onQuickPanelDone(self, index):
+    def assetFromIndex(self, index):
         if index == -1 or index == self.dummyIndex:
-            return
+            return None
 
         concreteAssets = self.vConcreteAssets()
         index = self.indexOfAssetMap[index]
@@ -131,12 +154,26 @@ class PanelAssetBaseCommand(sublime_plugin.WindowCommand):
         else:
             asset = concreteAssets[index]
 
+        return asset
+
+    def onQuickPanelDone(self, index):
+        if index == -1:
+            self.vOnQuickPanelCancel()
+            return
+
+        asset = self.assetFromIndex(index)
+        if asset is None:
+            return
+
         self.vInvokeAsset(asset)
-        self.vPrjInfo().regItem("last_palkey", asset.key)
+        self.vPrjInfo().regItem("last_key", asset.key)
+
+    def vOnQuickPanelCancel(self):
+        pass
 
     def invokeKey(self, key):
         key = key.lower()
-        for asset in self.vAssets():
+        for asset in self.allAssets():
             if asset.key == key:
                 self.vInvokeAsset(asset)
                 return
