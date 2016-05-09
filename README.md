@@ -6,7 +6,7 @@ Want install? See [Installation](https://github.com/iamstorm/SublimeStorm/)
 ## This pacakge has several very usefull tools for sublime text:
 
 ### 1. Another command palette(also named as storm palette)
-    It give you another command palette which just contain your wanted commands written in your personal config json file.
+It give you another command palette which just contain your wanted commands written in your personal config json file.
 If you have lot's of self customized commands that are not invoked very offen (not for edit code but for toolchaining) but you want to invoke it easily then you will need this plugin.
 
 For the above purpose, the buildin command palette seem a good candidate for it. But when you install lot of packages, the command palette will be polluted by some commands which you don't want. And what is more, the name in the command palette is not in your control.The storm palette come into rescue for this case. It give you all control. And you can just write command binding in the json file. In this pacakage, it also provide some command for you to easily write command binding:
