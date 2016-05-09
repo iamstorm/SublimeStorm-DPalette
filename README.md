@@ -18,58 +18,70 @@ commands:
 - storm_palette_record    # prompt and input some keyword and auto record a new binding in the dynamic json binding file
 - manage_snippet_base     # copy some code as snippet, and use this snippet on the fly
 
-and another very functional palette which use to record some tip for future:
-- search_ref_palette      # show the quick panel for all the tip (markdown format) you writed
-
 for the favor of the binding you will write, see the following examples:
 ```
-{"key": "publish package to github",
- "command": "run_shell_cmd",  "args": {
-    "questions": [{"key": "message", "title": "commit message",
-                  "pattern": "^\\s*(?P<message>.+?)?\\s*$", "answer_tempate": "{{message}}",
-                  "default_dict": {"message": "auto commit"}}],
-    "commands": ["git add -A", "git commit -m \"{{message}}\"", "git push"],
-    "run_opts": {"cwd": "${packages}"}}
-},
+{
+    "assets": [
+        {"key": "publish package to github",
+         "command": "run_shell_cmd",  "args": {
+            "questions": [{"key": "message", "title": "commit message",
+                          "pattern": "^\\s*(?P<message>.+?)?\\s*$", "answer_tempate": "{{message}}",
+                          "default_dict": {"message": "auto commit"}}],
+            "commands": ["git add -A", "git commit -m \"{{message}}\"", "git push"],
+            "run_opts": {"cwd": "${packages}"}}
+        },
+        
+        {"key": "open package directory",
+         "command": "run_shell_cmd",  "args": {
+            "commands": ["cmd /c start \"\" \"${packages}\""]}
+        },
+        
+        {"key": "git difftool", "command": "mul_run" , "args": {
+                "commands" : [
+                    {"command": "save"},
+                    {"command": "run_shell_cmd",
+                        "args":{
+                            "commands": ["cmd /c git difftool \"${file}\""],
+                            "run_mode": "run","win_mode": "hide"
+                        }, "context": "window"
+                    },
+            ]}
+        },
+        
+        {"key": "record global file", "command": "storm_palette_record",  "args": {
+            "questions": [{"key": "palkey"}],
+            "content": {
+                "key": "{{palkey}}",
+                "command": "eval_python_code",
+                "args": {
+                    "code": "sublime.active_window().open_file(\"${file!unixpath}\")",
+                    "show_result": "error"
+                }
+            }}
+        },
+        {"key": "record project file", "command": "storm_palette_record",  "args": {
+            "questions": [{"key": "palkey"}],
+            "belong_to_project": true,
+            "content": {
+                "key": "{{palkey}}",
+                "command": "eval_python_code",
+                "args": {
+                    "code": "sublime.active_window().open_file(\"${file!unixpath}\")",
+                    "show_result": "error"
+                }
+            }}
+        },
+    ]
+}
+```
 
-{"key": "open package directory",
- "command": "run_shell_cmd",  "args": {
-    "commands": ["cmd /c start \"\" \"${packages}\""]}
-},
-
-{"key": "git difftool", "command": "mul_run" , "args": {
-        "commands" : [
-            {"command": "save"},
-            {"command": "run_shell_cmd",
-                "args":{
-                    "commands": ["cmd /c git difftool \"${file}\""],
-                    "run_mode": "run","win_mode": "hide"
-                }, "context": "window"
-            },
-    ]}
-},
-
-{"key": "record global file", "command": "storm_palette_record",  "args": {
-    "questions": [{"key": "palkey"}],
-    "content": {
-        "key": "{{palkey}}",
-        "command": "eval_python_code",
-        "args": {
-            "code": "sublime.active_window().open_file(\"${file!unixpath}\")",
-            "show_result": "error"
-        }
-    }}
-},
-{"key": "record project file", "command": "storm_palette_record",  "args": {
-    "questions": [{"key": "palkey"}],
-    "belong_to_project": true,
-    "content": {
-        "key": "{{palkey}}",
-        "command": "eval_python_code",
-        "args": {
-            "code": "sublime.active_window().open_file(\"${file!unixpath}\")",
-            "show_result": "error"
-        }
-    }}
-},
+### 2. A very functional palette which use to record tips for future:
+- search_ref_palette      # show the quick panel for all the tip (markdown format) you writed
+you can add a binding to be invoke by storm palette:
+```
+{
+    "assets": [
+        {"key": "search reference palette", "command": "search_ref_palette"}
+    ]
+}
 ```
