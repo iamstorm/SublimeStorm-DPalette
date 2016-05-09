@@ -75,6 +75,9 @@ for the favor of the binding you will write, see the following examples:
 }
 ```
 
+see the file:`storm_palette.sublime-settings` and edit the `palkey_path` key to locate your private binding files
+the binding files is a json file with name `default.stormpal.key` and with the content as above
+
 ### 2. A very functional palette which use to record tips for future:
 - search_ref_palette      # show the quick panel for all the tip (markdown format) you writed
 you can add a binding to be invoke by storm palette:
@@ -85,3 +88,6 @@ you can add a binding to be invoke by storm palette:
     ]
 }
 ```
+
+see the file:`search_ref_palette.sublime-settings` and edit the `palkey_path` key to locate your private markdown tip files,
+the palette will parse the markdown file and show the header section for you to select, and it will preview the content in a seperate view(auto created and destroyed)
