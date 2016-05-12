@@ -5,7 +5,7 @@ import sublime
 import sublime_plugin
 from SublimeUtils import Setting
 
-SKEY = "StormErrorPanel"
+SKEY = "StormOutputView"
 ps = Setting.PluginSetting(SKEY)
 def plugin_loaded():
     initSettings()
@@ -16,7 +16,7 @@ def plugin_unloaded():
 def initSettings():
     defaultOptions = {
         "syntax_file":
-        "Packages/SublimeStorm-DPalette/StormErrorPanel.sublime-syntax",
+        "Packages/SublimeStorm-DPalette/StormOutputView.sublime-syntax",
 
         "result_file_regex":
         "(?i)^\\s*File\\s*:?\\s*(?:\"|')?(.+?)(?:\"|')?,\\s*line\\s*:?\\s*([0-9]+)",
@@ -47,16 +47,16 @@ def fwNotify(f):
         ps.updateDynOpts(**notifyKwds)
 
 
-        lines = errorPanel.formatTolineData(infos)
-        isInfoShowed = errorPanel.isVisible()
+        lines = outputView.formatTolineData(infos)
+        isInfoShowed = outputView.isVisible()
         if show_result == "allways" or (show_result == "error" and withErr):
-            errorPanel.update(data=lines)
+            outputView.update(data=lines)
             isInfoShowed = True
         elif show_result == "has_output" and any(info.hasOutput() for info in infos):
-            errorPanel.update(data=lines)
+            outputView.update(data=lines)
             isInfoShowed = True
         else:
-            errorPanel.update(data=lines, show=False)
+            outputView.update(data=lines, show=False)
 
         if withErr and not isInfoShowed:
             sublime.error_message("meet error!")
@@ -65,7 +65,7 @@ def fwNotify(f):
 
     return wrapper
 
-class StormErrorPanelFlushCommand(sublime_plugin.TextCommand):
+class StormOutputViewFlushCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwds):
         data = kwds["data"]
         erase = kwds.get("erase", True)
@@ -79,23 +79,23 @@ class StormErrorPanelFlushCommand(sublime_plugin.TextCommand):
         if scroll_end:
             self.view.show(self.view.size())
 
-class StormErrorPanelHideCommand(sublime_plugin.TextCommand):
+class StormOutputViewHideCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        errorPanel.data = self.view.substr(sublime.Region(0, self.view.size()))
+        outputView.data = self.view.substr(sublime.Region(0, self.view.size()))
 
-class StormErrorPanelShowCommand(sublime_plugin.WindowCommand):
+class StormOutputViewShowCommand(sublime_plugin.WindowCommand):
     def run(self, **kwds):
         toggle = kwds.get("toggle", None)
         if toggle:
-            if errorPanel.isVisible(self.window):
-                errorPanel.close()
+            if outputView.isVisible(self.window):
+                outputView.close()
             else:
-                errorPanel.update(data=errorPanel.data, window=self.window)
+                outputView.update(data=outputView.data, window=self.window)
         else:
-            errorPanel.update(data=errorPanel.data, window=self.window)
+            outputView.update(data=outputView.data, window=self.window)
 
 
-class StorMErrorPanel(object):
+class StorMOutputView(object):
     def __init__(self):
         self.view = None
         self.data = None
@@ -121,9 +121,9 @@ class StorMErrorPanel(object):
 
     @staticmethod
     def isVisible(window=None):
-        ret = errorPanel.view != None and errorPanel.view.window() != None
+        ret = outputView.view != None and outputView.view.window() != None
         if ret and window:
-            ret = errorPanel.view.window().id() == window.id()
+            ret = outputView.view.window().id() == window.id()
         return ret
 
     @staticmethod
@@ -139,7 +139,7 @@ class StorMErrorPanel(object):
     def flush(self):
         result_file_regex = ps.dynOpts["result_file_regex"]
         if result_file_regex:
-            errorPanel.view.settings().set("result_file_regex", result_file_regex)
+            outputView.view.settings().set("result_file_regex", result_file_regex)
 
         self.view.run_command(
             "storm_error_panel_flush",
@@ -161,10 +161,10 @@ class StorMErrorPanel(object):
 
     @staticmethod
     def close():
-        errorPanel.view.run_command("storm_error_panel_hide")
+        outputView.view.run_command("storm_error_panel_hide")
         sublime.active_window().run_command("hide_panel", {"panel": "output.storm"})
 
-errorPanel = StorMErrorPanel()
+outputView = StorMOutputView()
 InfoSection = namedtuple("InfoSection", "title, content, isOutput")
 class Info(object):
     def __init__(self, header, *sections):
@@ -196,8 +196,9 @@ class Info(object):
         return [Info.formatSectionHeader(sec.title)] + lines
 
     @staticmethod
-    def formatSectionHeader(title):
-        return Info.wrapTitle(title).center(Info.WIDTH, Info.SECTION_FILL_CHAR)
+    def formatSectionHeader(title, landscape=True):
+        width = Info.WIDTH if landscape else Info.WIDTH * 9/16
+        return Info.wrapTitle(title).center(int(width), Info.SECTION_FILL_CHAR)
 
 def DynamicUpdate(infos, **notifyKwds):
     ps.updateDynOpts(**notifyKwds)
@@ -207,5 +208,5 @@ def DynamicUpdate(infos, **notifyKwds):
     if "scroll_end" not in notifyKwds:
         ps.dynOpts["scroll_end"] = False
 
-    lines = errorPanel.formatTolineData(infos)
-    errorPanel.update(data=lines)
+    lines = outputView.formatTolineData(infos)
+    outputView.update(data=lines)

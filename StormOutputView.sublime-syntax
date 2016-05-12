@@ -2,7 +2,8 @@
 ---
 # http://www.sublimetext.com/docs/3/syntax.html
 name: StormErrorPanel
-file_extensions: []
+file_extensions:
+  - stormoutput
 scope: text.userstormError
 variables:
   svIdent: '[A-Za-z_][A-Za-z_0-9]*+'
