@@ -91,3 +91,7 @@ you can add a binding to be invoke by storm palette:
 
 see the file:`search_ref_palette.sublime-settings` and edit the `palkey_path` key to locate your private markdown tip files,
 the palette will parse the markdown file and show the header section for you to select, and it will preview the content in a seperate view(auto created and destroyed)
+
+### 3. A clipboard palette
+- clipboard_palette     # show quick panel for your regesited texts
+There are some times you wanted to keep some temporary text which is from selection or from clipboard. you can use this command to register text with key. And afterward, you can use this key to fetch the text
