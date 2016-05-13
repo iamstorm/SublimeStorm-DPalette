@@ -5,7 +5,7 @@ Want install? See [Installation](https://github.com/iamstorm/SublimeStorm/)
 
 And it also use some command provide by plugin package: [Origami](https://github.com/SublimeText/Origami) (you can install it from package control)
 
-## This pacakge has several very useful tools for sublime text:
+## This pacakge has several very useful tools for sublime text 3:
 
 ### 1. Another command palette(also named as storm palette)
 It give you another command palette which just contain your wanted commands written in your personal config json file.
