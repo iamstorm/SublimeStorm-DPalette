@@ -2,6 +2,7 @@
 This is a plugin provided by SublimeStorm.
 
 Want install? See [Installation](https://github.com/iamstorm/SublimeStorm/)
+And it also use some command provide by plugin package: [Origami](https://github.com/SublimeText/Origami) (you can install it from package control)
 
 ## This pacakge has several very usefull tools for sublime text:
 
